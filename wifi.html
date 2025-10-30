@@ -1,0 +1,117 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Núcleo Sabana — Conectar Wi-Fi</title>
+<style>
+  :root{--accent:#0b7a57;--muted:#6b7280;--bg:#fff}
+  body{font-family:Inter,system-ui,Arial;margin:0;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:18px}
+  .card{max-width:640px;width:100%;background:#fff;border-radius:12px;box-shadow:0 8px 24px rgba(11,122,87,0.06);padding:20px}
+  .logo{width:52px;height:52px;border-radius:10px;background:linear-gradient(135deg,var(--accent),#0f9f73);display:flex;align-items:center;justify-content:center;color:#fff;font-weight:700}
+  h1{margin:0 0 8px;font-size:20px}
+  .label{font-weight:700}
+  .small{color:var(--muted);font-size:13px}
+  .actions{margin-top:12px;display:flex;gap:8px;flex-wrap:wrap}
+  .btn{background:var(--accent);color:#fff;padding:10px 14px;border-radius:10px;text-decoration:none;font-weight:600}
+  .ghost{background:#fff;border:1px solid #eee;color:var(--muted)}
+  .qr{width:150px;height:150px;border-radius:8px;border:1px solid #eee;display:flex;align-items:center;justify-content:center}
+  .grid{display:flex;gap:18px;align-items:center}
+  @media(max-width:520px){.grid{flex-direction:column;align-items:flex-start}}
+</style>
+</head>
+<body>
+  <main class="card" role="main">
+    <div style="display:flex;gap:12px;align-items:center;margin-bottom:10px">
+      <div class="logo">NS</div>
+      <div>
+        <h1>Núcleo Sabana — Conectar Wi-Fi</h1>
+        <div class="small">Acercá tu móvil al NFC o usá el botón. Si tu equipo no conecta automáticamente, usá abrir ajustes o el QR.</div>
+      </div>
+    </div>
+
+    <section id="content">
+      <div class="grid">
+        <div class="qr">
+          <img id="qr-img" alt="QR conectar Wi-Fi" style="max-width:100%;border-radius:6px"/>
+        </div>
+
+        <div style="flex:1">
+          <div class="small">Ubicación</div>
+          <div class="label" id="label">—</div>
+
+          <div style="margin-top:8px" class="small">Red (SSID)</div>
+          <div id="ssid" style="font-family:monospace">—</div>
+
+          <div style="margin-top:8px" class="small">Contraseña</div>
+          <div id="pwd" style="font-family:monospace;letter-spacing:0.4px">—</div>
+
+          <div class="actions">
+            <a id="connectBtn" class="btn" href="#">Intentar conectar (Android)</a>
+            <button id="openSettings" class="btn ghost">Abrir ajustes Wi-Fi (iPhone)</button>
+            <button id="copyBtn" class="btn ghost">Copiar contraseña</button>
+          </div>
+
+          <p class="small" style="margin-top:10px">Si tu teléfono no conecta automáticamente: pulsá "Abrir ajustes Wi-Fi" y pegá la contraseña; o escaneá el QR con la cámara.</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+<script>
+(async function(){
+  const params = new URLSearchParams(location.search);
+  const pid = params.get('p') || params.get('pid') || location.hash.replace('#','') || null;
+  if(!pid){
+    document.getElementById('content').innerHTML = '<div class="small">No se indicó piso. Asegurate que la URL tiene ?p=1302</div>';
+    return;
+  }
+
+  try{
+    const res = await fetch('floors.json', {cache:'no-store'});
+    if(!res.ok) throw new Error('No se pudo cargar floors.json');
+    const floors = await res.json();
+    const info = floors[pid];
+    if(!info){
+      document.getElementById('content').innerHTML = '<div class="small">Piso no encontrado: '+pid+'</div>';
+      return;
+    }
+
+    const SSID = info.ssid;
+    const PWD = info.password;
+    const LABEL = info.label || pid;
+
+    document.getElementById('label').textContent = LABEL;
+    document.getElementById('ssid').textContent = SSID;
+    document.getElementById('pwd').textContent = PWD;
+
+    const wifiPayload = `WIFI:T:WPA;S:${SSID};P:${PWD};;`;
+    const qrSrc = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' + encodeURIComponent(wifiPayload);
+    document.getElementById('qr-img').src = qrSrc;
+
+    document.getElementById('connectBtn').addEventListener('click',(e)=>{
+      e.preventDefault();
+      location.href = wifiPayload;
+      setTimeout(()=> {
+        if(confirm('Si no se conectó automáticamente, querés copiar la contraseña al portapapeles?')){
+          navigator.clipboard.writeText(PWD).then(()=> alert('Contraseña copiada') );
+        }
+      },700);
+    });
+
+    document.getElementById('openSettings').addEventListener('click',()=>{
+      window.location.href = 'App-Prefs:WIFI';
+      setTimeout(()=> navigator.clipboard.writeText(PWD).then(()=> alert('Contraseña copiada') ),500);
+    });
+
+    document.getElementById('copyBtn').addEventListener('click', ()=> {
+      navigator.clipboard.writeText(PWD).then(()=> alert('Contraseña copiada') );
+    });
+
+  }catch(err){
+    document.getElementById('content').innerHTML = '<div class="small">Error cargando datos: '+err.message+'</div>';
+  }
+})();
+</script>
+</body>
+</html>
