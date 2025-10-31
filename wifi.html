@@ -104,6 +104,7 @@
     </div>
 
     <button class="btn" id="copyBtn">📋 Copiar contraseña</button>
+    <button class="btn" id="connectBtn" style="display:none;">🔗 Conectarse automáticamente</button>
 
     <div id="qrcode"></div>
 
@@ -132,6 +133,20 @@
       QRCode.toCanvas(document.createElement("canvas"), wifiQR, { width: 180 }, (err, canvas) => {
         if (!err) document.getElementById("qrcode").appendChild(canvas);
       });
+
+      // Detectar sistema operativo
+      const ua = navigator.userAgent.toLowerCase();
+      const isAndroid = ua.includes("android");
+      const connectBtn = document.getElementById("connectBtn");
+
+      if (isAndroid) {
+        connectBtn.style.display = "inline-block";
+        connectBtn.addEventListener("click", () => {
+          // Intento de conexión directa a Wi-Fi en Android
+          const intentUrl = `intent://wifi/#Intent;scheme=wifi;S=${floor.ssid};P=${floor.password};T=WPA;end;`;
+          window.location.href = intentUrl;
+        });
+      }
     }
 
     document.getElementById("copyBtn").addEventListener("click", () => {
