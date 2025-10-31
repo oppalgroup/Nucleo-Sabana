@@ -79,3 +79,68 @@
     }
 
     .btn:hover {
+      background: #1d4ed8;
+    }
+
+    #qrcode {
+      margin-top: 1.5rem;
+      display: flex;
+      justify-content: center;
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      color: #6b7280;
+      margin-top: 1.5rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1 id="label">Cargando...</h1>
+    <div class="wifi-info">
+      <p>Red Wi-Fi: <span id="ssid">---</span></p>
+      <p>Contraseña: <span id="password">---</span></p>
+    </div>
+
+    <button class="btn" id="copyBtn">📋 Copiar contraseña</button>
+
+    <div id="qrcode"></div>
+
+    <div class="footer">Núcleo Sabana · Conexión rápida y segura</div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <script>
+    async function loadFloor() {
+      const params = new URLSearchParams(window.location.search);
+      const floorId = params.get("p");
+      const data = await fetch("floors.json").then((r) => r.json());
+      const floor = data[floorId];
+
+      if (!floor) {
+        document.getElementById("label").textContent = "Piso no encontrado";
+        return;
+      }
+
+      document.getElementById("label").textContent = floor.label;
+      document.getElementById("ssid").textContent = floor.ssid;
+      document.getElementById("password").textContent = floor.password;
+
+      // Generar QR Wi-Fi
+      const wifiQR = `WIFI:T:WPA;S:${floor.ssid};P:${floor.password};;`;
+      QRCode.toCanvas(document.createElement("canvas"), wifiQR, { width: 180 }, (err, canvas) => {
+        if (!err) document.getElementById("qrcode").appendChild(canvas);
+      });
+    }
+
+    document.getElementById("copyBtn").addEventListener("click", () => {
+      const password = document.getElementById("password").textContent;
+      navigator.clipboard.writeText(password);
+      alert("✅ Contraseña copiada al portapapeles");
+    });
+
+    loadFloor();
+  </script>
+</body>
+</html>
