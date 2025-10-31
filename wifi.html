@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Wi-Fi Piso</title>
+<style>
+body { font-family: Arial, sans-serif; padding: 20px; }
+h1 { margin-bottom: 10px; }
+button { margin-top: 10px; padding: 10px; font-size: 16px; }
+.qr { margin-top: 20px; }
+</style>
+</head>
+<body>
+<h1 id="label">Cargando...</h1>
+<p><strong>SSID:</strong> <span id="ssid"></span></p>
+<p><strong>Contraseña:</strong> <span id="password"></span></p>
+<button id="copyBtn">Copiar contraseña</button>
+<div class="qr" id="qrcode"></div>
+
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script>
+async function loadFloor() {
+  const params = new URLSearchParams(window.location.search);
+  const floorId = params.get('p');
+  const data = await fetch('floors.json').then(r => r.json());
+  const floor = data[floorId];
+
+  if (!floor) {
+    document.getElementById('label').textContent = "Piso no encontrado";
+    return;
+  }
+
+  document.getElementById('label').textContent = floor.label;
+  document.getElementById('ssid').textContent = floor.ssid;
+  document.getElementById('password').textContent = floor.password;
+
+  // Generar QR Wi-Fi
+  const wifiQR = `WIFI:T:WPA;S:${floor.ssid};P:${floor.password};;`;
+  QRCode.toCanvas(document.getElementById('qrcode'), wifiQR, { width: 200 });
+}
+
+document.getElementById('copyBtn').addEventListener('click', () => {
+  const password = document.getElementById('password').textContent;
+  navigator.clipboard.writeText(password);
+  alert('Contraseña copiada al portapapeles');
+});
+
+loadFloor();
+</script>
+</body>
+</html>
