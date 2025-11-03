@@ -13,7 +13,6 @@
       --radius: 1rem;
     }
 
-    /* Fondo principal */
     body {
       font-family: "Inter", sans-serif;
       background-image: url("https://oppalgroup.github.io/nucleo-sabana/nucleo.png");
@@ -30,7 +29,6 @@
       overflow: hidden;
     }
 
-    /* Capa oscura sutil (para legibilidad del texto) */
     body::before {
       content: "";
       position: absolute;
@@ -40,7 +38,6 @@
       z-index: 0;
     }
 
-    /* Tarjeta */
     .card {
       position: relative;
       z-index: 1;
@@ -122,11 +119,9 @@
   </div>
 
   <script>
-    // Obtener el parámetro ?p= del URL
     const params = new URLSearchParams(window.location.search);
     const floor = params.get("p");
 
-    // Cargar datos desde floors.json (mismo dominio)
     fetch("./floors.json")
       .then(response => {
         if (!response.ok) throw new Error("No se pudo cargar floors.json");
@@ -135,10 +130,12 @@
       .then(data => {
         const wifiData = data[floor];
         if (wifiData) {
-          document.getElementById("floor-title").textContent = `Conexión Wi-Fi Piso ${floor}`;
+          // Mostrar la info del piso
+          document.getElementById("floor-title").textContent = wifiData.label || `Piso ${floor}`;
           document.getElementById("ssid").textContent = wifiData.ssid;
           document.getElementById("password").textContent = wifiData.password;
         } else {
+          // Piso no encontrado
           document.getElementById("wifi-card").innerHTML = `
             <h1>Piso no encontrado</h1>
             <p>No hay información de Wi-Fi para este piso.</p>`;
@@ -148,4 +145,18 @@
         console.error("Error al cargar floors.json:", err);
         document.getElementById("wifi-card").innerHTML = `
           <h1>Error</h1>
-          <p>No se pudo cargar la información.</p>
+          <p>No se pudo cargar la información.</p>`;
+      });
+
+    // Copiar contraseña
+    document.getElementById("copy-btn").addEventListener("click", () => {
+      const password = document.getElementById("password").textContent;
+      if (password) {
+        navigator.clipboard.writeText(password).then(() => {
+          alert("Contraseña copiada al portapapeles ✅");
+        });
+      }
+    });
+  </script>
+</body>
+</html>
