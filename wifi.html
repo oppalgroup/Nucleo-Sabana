@@ -15,7 +15,7 @@
 
     body {
       font-family: "Inter", sans-serif;
-      background-image: url("https://oppalgroup.github.io/nucleo-sabana/nucleo.png");
+      background-image: url("./nucleo.png");
       background-size: cover;
       background-position: center;
       background-attachment: fixed;
@@ -103,4 +103,65 @@
     .footer {
       font-size: 0.8rem;
       color: #d1d5db;
-      margin-top: 1r
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="wifi-card">
+    <h1 id="floor-title">Conexión Wi-Fi</h1>
+    <div class="wifi-info" id="wifi-info">
+      <p>Cargando datos...</p>
+    </div>
+    <button class="btn" id="copy-btn" style="display:none;">Copiar contraseña</button>
+    <div class="footer">© Núcleo Sabana</div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", async () => {
+      const params = new URLSearchParams(window.location.search);
+      const floor = params.get("p");
+      const infoBox = document.getElementById("wifi-info");
+      const title = document.getElementById("floor-title");
+      const btn = document.getElementById("copy-btn");
+
+      if (!floor) {
+        infoBox.innerHTML = "<p>No se especificó piso.</p>";
+        return;
+      }
+
+      try {
+        // Evitar caché en GitHub Pages
+        const cacheBust = Date.now();
+        const response = await fetch(`./floors.json?nocache=${cacheBust}`);
+        if (!response.ok) throw new Error("Error al cargar floors.json");
+        const data = await response.json();
+
+        const info = data[floor];
+        if (!info) {
+          title.textContent = "Piso no encontrado";
+          infoBox.innerHTML = "<p>No hay información de Wi-Fi para este piso.</p>";
+          return;
+        }
+
+        title.textContent = info.label;
+        infoBox.innerHTML = `
+          <p>Red: <span>${info.ssid}</span></p>
+          <p>Contraseña: <span id="password">${info.password}</span></p>
+        `;
+
+        btn.style.display = "inline-block";
+        btn.onclick = () => {
+          const pass = document.getElementById("password").textContent;
+          navigator.clipboard.writeText(pass).then(() => {
+            alert("Contraseña copiada ✅");
+          });
+        };
+      } catch (err) {
+        console.error(err);
+        infoBox.innerHTML = "<p>Error al cargar la información.</p>";
+      }
+    });
+  </script>
+</body>
+</html>
