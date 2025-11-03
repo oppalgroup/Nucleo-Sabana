@@ -113,6 +113,7 @@
     <div class="wifi-info" id="wifi-info">
       <p>Cargando datos...</p>
     </div>
+    <button class="btn" id="connect-btn" style="display:none;">Conectarse automáticamente</button>
     <button class="btn" id="copy-btn" style="display:none;">Copiar contraseña</button>
     <div class="footer">© Núcleo Sabana</div>
   </div>
@@ -123,7 +124,8 @@
       const floor = params.get("p");
       const infoBox = document.getElementById("wifi-info");
       const title = document.getElementById("floor-title");
-      const btn = document.getElementById("copy-btn");
+      const btnCopy = document.getElementById("copy-btn");
+      const btnConnect = document.getElementById("connect-btn");
 
       if (!floor) {
         infoBox.innerHTML = "<p>No se especificó piso.</p>";
@@ -131,7 +133,7 @@
       }
 
       try {
-        // Evitar caché en GitHub Pages
+        // Evitar caché
         const cacheBust = Date.now();
         const response = await fetch(`./floors.json?nocache=${cacheBust}`);
         if (!response.ok) throw new Error("Error al cargar floors.json");
@@ -150,18 +152,8 @@
           <p>Contraseña: <span id="password">${info.password}</span></p>
         `;
 
-        btn.style.display = "inline-block";
-        btn.onclick = () => {
+        // Mostrar botón de copiar
+        btnCopy.style.display = "inline-block";
+        btnCopy.onclick = () => {
           const pass = document.getElementById("password").textContent;
-          navigator.clipboard.writeText(pass).then(() => {
-            alert("Contraseña copiada ✅");
-          });
-        };
-      } catch (err) {
-        console.error(err);
-        infoBox.innerHTML = "<p>Error al cargar la información.</p>";
-      }
-    });
-  </script>
-</body>
-</html>
+          navigator.clipboa
