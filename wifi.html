@@ -13,7 +13,7 @@
       --radius: 1rem;
     }
 
-    /* Fondo principal */
+    /* Fondo con imagen */
     body {
       font-family: "Inter", sans-serif;
       background-image: url("https://oppalgroup.github.io/nucleo-sabana/nucleo.png");
@@ -30,13 +30,13 @@
       overflow: hidden;
     }
 
-    /* Capa oscura con desenfoque sutil */
+    /* Capa oscura MUY suave (no tapa el fondo) */
     body::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.35);
-      backdrop-filter: blur(6px);
+      background: rgba(0, 0, 0, 0.25); /* más transparente */
+      backdrop-filter: blur(3px);
       z-index: 0;
     }
 
@@ -44,7 +44,7 @@
     .card {
       position: relative;
       z-index: 1;
-      background: var(--card-bg);
+      background: rgba(0, 0, 0, 0.55);
       border-radius: var(--radius);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       max-width: 400px;
@@ -52,7 +52,7 @@
       padding: 24px;
       text-align: center;
       animation: fadeIn 0.6s ease;
-      backdrop-filter: blur(10px);
+      backdrop-filter: blur(8px);
     }
 
     @keyframes fadeIn {
@@ -73,4 +73,90 @@
     }
 
     .wifi-info {
-      bac
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: var(--radius);
+      padding: 1rem;
+      margin: 1rem 0;
+    }
+
+    .wifi-info span {
+      display: block;
+      font-weight: 600;
+      color: var(--primary);
+    }
+
+    .btn {
+      display: inline-block;
+      background: var(--primary);
+      color: white;
+      border: none;
+      border-radius: 9999px;
+      padding: 12px 24px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 12px;
+      transition: background 0.3s ease, transform 0.2s ease;
+    }
+
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
+
+    .footer {
+      font-size: 0.8rem;
+      color: #d1d5db;
+      margin-top: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="card" id="wifi-card">
+    <h1 id="floor-title">Conexión Wi-Fi</h1>
+    <div class="wifi-info">
+      <p>Red: <span id="ssid"></span></p>
+      <p>Contraseña: <span id="password"></span></p>
+    </div>
+    <button class="btn" id="copy-btn">Copiar contraseña</button>
+    <div class="footer">© Núcleo Sabana</div>
+  </div>
+
+  <script>
+    // Obtener ?p= del URL
+    const params = new URLSearchParams(window.location.search);
+    const floor = params.get("p");
+
+    // Cargar datos de floors.json
+    fetch("https://raw.githubusercontent.com/oppalgroup/nucleo-sabana/main/floors.json")
+      .then(response => response.json())
+      .then(data => {
+        const wifiData = data[floor];
+        if (wifiData) {
+          document.getElementById("floor-title").textContent = `Conexión Wi-Fi Piso ${floor}`;
+          document.getElementById("ssid").textContent = wifiData.ssid;
+          document.getElementById("password").textContent = wifiData.password;
+        } else {
+          document.getElementById("wifi-card").innerHTML = `
+            <h1>Piso no encontrado</h1>
+            <p>No hay información de Wi-Fi para este piso.</p>`;
+        }
+      })
+      .catch(err => {
+        console.error("Error al cargar floors.json:", err);
+        document.getElementById("wifi-card").innerHTML = `
+          <h1>Error</h1>
+          <p>No se pudo cargar la información.</p>`;
+      });
+
+    // Copiar contraseña
+    document.getElementById("copy-btn").addEventListener("click", () => {
+      const password = document.getElementById("password").textContent;
+      if (password) {
+        navigator.clipboard.writeText(password).then(() => {
+          alert("Contraseña copiada al portapapeles ✅");
+        });
+      }
+    });
+  </script>
+</body>
+</html>
