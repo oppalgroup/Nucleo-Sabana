@@ -13,7 +13,7 @@
       --radius: 1rem;
     }
 
-    /* Fondo con imagen */
+    /* Fondo principal */
     body {
       font-family: "Inter", sans-serif;
       background-image: url("https://oppalgroup.github.io/nucleo-sabana/nucleo.png");
@@ -30,12 +30,12 @@
       overflow: hidden;
     }
 
-    /* Capa oscura MUY suave (no tapa el fondo) */
+    /* Capa oscura sutil (para legibilidad del texto) */
     body::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.25); /* más transparente */
+      background: rgba(0, 0, 0, 0.25);
       backdrop-filter: blur(3px);
       z-index: 0;
     }
@@ -44,7 +44,7 @@
     .card {
       position: relative;
       z-index: 1;
-      background: rgba(0, 0, 0, 0.55);
+      background: var(--card-bg);
       border-radius: var(--radius);
       box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
       max-width: 400px;
@@ -52,7 +52,7 @@
       padding: 24px;
       text-align: center;
       animation: fadeIn 0.6s ease;
-      backdrop-filter: blur(8px);
+      backdrop-filter: blur(10px);
     }
 
     @keyframes fadeIn {
@@ -122,13 +122,16 @@
   </div>
 
   <script>
-    // Obtener ?p= del URL
+    // Obtener el parámetro ?p= del URL
     const params = new URLSearchParams(window.location.search);
     const floor = params.get("p");
 
-    // Cargar datos de floors.json
-    fetch("https://raw.githubusercontent.com/oppalgroup/nucleo-sabana/main/floors.json")
-      .then(response => response.json())
+    // Cargar datos desde floors.json (mismo dominio)
+    fetch("./floors.json")
+      .then(response => {
+        if (!response.ok) throw new Error("No se pudo cargar floors.json");
+        return response.json();
+      })
       .then(data => {
         const wifiData = data[floor];
         if (wifiData) {
@@ -145,18 +148,4 @@
         console.error("Error al cargar floors.json:", err);
         document.getElementById("wifi-card").innerHTML = `
           <h1>Error</h1>
-          <p>No se pudo cargar la información.</p>`;
-      });
-
-    // Copiar contraseña
-    document.getElementById("copy-btn").addEventListener("click", () => {
-      const password = document.getElementById("password").textContent;
-      if (password) {
-        navigator.clipboard.writeText(password).then(() => {
-          alert("Contraseña copiada al portapapeles ✅");
-        });
-      }
-    });
-  </script>
-</body>
-</html>
+          <p>No se pudo cargar la información.</p>
