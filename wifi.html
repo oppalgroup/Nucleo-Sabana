@@ -13,6 +13,7 @@
       --radius: 1rem;
     }
 
+    /* Fondo principal */
     body {
       font-family: "Inter", sans-serif;
       background-image: url("https://oppalgroup.github.io/nucleo-sabana/fondo.png");
@@ -29,15 +30,17 @@
       overflow: hidden;
     }
 
+    /* Capa oscura con desenfoque sutil */
     body::before {
       content: "";
       position: absolute;
       inset: 0;
-      background: rgba(0, 0, 0, 0.45);
-      backdrop-filter: blur(8px);
+      background: rgba(0, 0, 0, 0.35); /* opacidad más baja para que se vea bien el fondo */
+      backdrop-filter: blur(6px);
       z-index: 0;
     }
 
+    /* Tarjeta */
     .card {
       position: relative;
       z-index: 1;
@@ -48,7 +51,7 @@
       width: 100%;
       padding: 24px;
       text-align: center;
-      animation: fadeIn 0.5s ease;
+      animation: fadeIn 0.6s ease;
       backdrop-filter: blur(10px);
     }
 
@@ -57,8 +60,17 @@
       to { opacity: 1; transform: translateY(0); }
     }
 
-    h1 { font-size: 1.6rem; margin-bottom: 0.5rem; color: #ffffff; }
-    p { margin: 0.3rem 0; font-size: 1rem; color: #e5e7eb; }
+    h1 {
+      font-size: 1.6rem;
+      margin-bottom: 0.5rem;
+      color: #ffffff;
+    }
+
+    p {
+      margin: 0.3rem 0;
+      font-size: 1rem;
+      color: #e5e7eb;
+    }
 
     .wifi-info {
       background: rgba(255, 255, 255, 0.1);
@@ -67,7 +79,11 @@
       margin: 1rem 0;
     }
 
-    .wifi-info span { display: block; font-weight: 600; color: var(--primary); }
+    .wifi-info span {
+      display: block;
+      font-weight: 600;
+      color: var(--primary);
+    }
 
     .btn {
       display: inline-block;
@@ -82,7 +98,10 @@
       transition: background 0.3s ease, transform 0.2s ease;
     }
 
-    .btn:hover { background: #1d4ed8; transform: translateY(-2px); }
+    .btn:hover {
+      background: #1d4ed8;
+      transform: translateY(-2px);
+    }
 
     .footer {
       font-size: 0.8rem;
@@ -103,10 +122,11 @@
   </div>
 
   <script>
-    // Obtener piso desde URL usando el parámetro ?p=
+    // 🔹 Obtener el parámetro ?p= del URL
     const params = new URLSearchParams(window.location.search);
-    const floor = params.get("p");  // Cambiado a "p"
+    const floor = params.get("p");  // ← usa ?p=1302
 
+    // 🔹 Cargar los datos desde floors.json en tu repo
     fetch("https://raw.githubusercontent.com/oppalgroup/nucleo-sabana/main/floors.json")
       .then(response => response.json())
       .then(data => {
@@ -128,15 +148,15 @@
           <p>No se pudo cargar la información.</p>`;
       });
 
-    // Copiar contraseña
+    // 🔹 Copiar contraseña al portapapeles
     document.getElementById("copy-btn").addEventListener("click", () => {
       const password = document.getElementById("password").textContent;
-      navigator.clipboard.writeText(password).then(() => {
-        alert("Contraseña copiada al portapapeles");
-      });
+      if (password) {
+        navigator.clipboard.writeText(password).then(() => {
+          alert("Contraseña copiada al portapapeles ✅");
+        });
+      }
     });
   </script>
 </body>
 </html>
-
-
